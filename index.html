@@ -2,41 +2,388 @@
 <header>
     <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    <link type="text/css" rel="stylesheet" href="https://unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.css"/>
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="https://unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.js"></script>
+    <script src="https://kit.fontawesome.com/3f3ed23357.js" crossorigin="anonymous"></script>
     <link href="http://cdn.qesg.co.kr/css/basic.css" rel="stylesheet">
 </header>
 <body>
     <div id="app">
         <div class="container">
-            <div class="col">
-                {{ report_contents }}
-            </div> 
+
+            <!-- GRI 100 -->
+            <h3 class="pt-5 mb-4">
+                Universal Standards: <span class="fw-600"> GRI 100 </span>
+            </h3>
+            <div class="table-responsive">
+                <table class="table-responsive disclosure-table border-bottom mb-5" style="width: calc(100% + 2px)" 
+                v-for="(category, index) in series_100"
+                :key="category.id"
+                >
+                    <thead>
+                        <tr>
+                            <td style="min-width:22%; width:30%;" />
+                            <td class="text-right">
+                                <div class="f-90">
+                                    <i class="fa-solid fa-table ml-3 mr-1">{{lang!='ENG' ? '테이블':'Tables'}}</i>
+                                    <i class="fa-solid fa-file-lines ml-3 mr-1">{{ lang!='ENG' ? '문서':'Files' }}</i>
+                                    <i class="fa-solid fa-arrow-up-right-from-square ml-3 mr-1">{{ lang!='ENG' ? '외부링크': 'Links'}} </i>
+                                    <i class="fa-solid fa-expand ml-3 mr-1">{{ lang!='ENG'? '비즈니스 사례':'Business Cases' }}></i>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="px-3 py-2 border-0 f-130 fw-500 bgray-700 text-white">
+                                {{ index+1 }}. {{ lang!='ENG' ? category.name : category.name_e }}
+                            </td>
+                            <td class="bgray-700"></td>
+                        </tr>
+                    </thead>
+                    <tbody class="border-0">
+                        <tr v-for="item in series_contents(index)" :key="item.id">
+                            <td>
+                                <div class="d-flex">
+                                    <div class="f-110 fw-500" style="min-width: 70px;">
+                                        {{ item.gri_code }}
+                                    </div>
+                                    <div class="f-105">
+                                        {{ lang!='ENG'? item.indicator_name : item.indicator_name_e }}
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div :class="item.direct_report? 'f-105 mb-4' : '' ">
+                                    {{ lang != 'ENG' ? item.direct_report: item.dicrect_report_e }}
+                                </div>
+
+                                <data-tables :disclosure_id="item.disclosure_id"></data-tables>
+                                <report-documents :disclosure_id="item.disclosure_id"></report-documents>
+                                <buisness-cases :disclosure_id="item.disclosure_id" @show-modal="showBusinessCaseModal"></buisness-cases>
+
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div v-show="show_modal==true" class="hj-modal-example-lg bg-white rounded shadow">
+                    <div class="hj-modal-header fw-500 f-120 d-flex align-items-center justify-content-between px-3">
+                        <div><span class="mr-2 f-100"> Business Case.</span> {{ lang!='ENG'? business_case.title : business_case.title_e }}</div>
+                        <button class="ml-auto py-0 px-2 mr-1" @click="low_height=!low_height"><i :class="low_height==true? 'fa-solid fa-expand' :'fa-solid fa-compress-alt'"></i></b-button>
+                        <button class="py-0 px-2" @click="show_modal=false"><i class="fa-solid fa-times"></i> </b-button>
+                    </div>
+                    <div class="hj-modal-body p-4" :style="low_height==true? 'height:calc(50vh - 50px)!important':''">
+                        <div v-if="lang!='ENG'">
+                            <div class="bc-simple-content pb-4" v-html="business_case.description"></div>
+                            <div v-if="business_case.business_case_id!=''&&business_case.files.length>0" class="f-95 gray-600 mb-45">
+                                첨부파일 :
+                                <span v-for="item in business_case.files" :key="item.id" class="mr-3">
+                                    <a :href="static_host+item.file_path" target="_blank">{{ item.file_name }}</a>
+                                </span>
+                            </div>
+                        </div>
+                        <div v-else>
+                            <div class="bc-simple-content pb-4" v-html="business_case.description_e"></div>
+                            <div v-if="business_case.business_case_id!=''&&business_case.files_e.length>0" class="f-95 gray-600 mb-45">
+                                Attatched File :
+                                <span v-for="item in business_case.files_e" :key="item.id" class="mr-3">
+                                    <a :href="static_host+item.file_path_e" target="_blank">{{ item.file_name }}</a>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div> 
+            </div>
+
+            <!-- GRI 200 ~ 400 -->
+            
+
+
+
         </div>
     </div>
     <script type="text/javascript">
+
+        var end_point = 'http://localhost:5000/api'
+        var lang = 'KOR'
+        var dataTables = {
+            template : `
+                <div>
+                    <div v-if="table_lists.length>0">
+                        <div v-for="dt in table_lists" :key="dt.id" class="f-105 line-height-lg">
+                            <div class="mb-2 fw-500">
+                                <i class="fa-solid fa-table mr-1"></i> {{ lang != 'ENG' ? dt.title : dt.title_e }}
+                            </div>
+                            <div class="table-responsive mb-4">
+                                <table v-if="lang!='ENG'" class="edi-table" v-for="item in table_lists">
+                                    <thead>
+                                        <tr>
+                                            <td v-for="(property, col_index) in dt.header" :key="col_index">
+                                                {{ property }}
+                                            </td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr v-for="row_item in dt.contents" :key="row_item.id"> 
+                                            <td v-for="property in dt.header" :key="property.id">
+                                                {{ row_item[property] }}
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <table v-else class="edi-table" v-for="item in table_lists">
+                                    <thead>
+                                        <tr>
+                                            <td v-for="(property, col_index) in dt.header_e" :key="col_index">
+                                                {{ property }}
+                                            </td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr v-for="row_item in dt.contents_e" :key="row_item.id"> 
+                                            <td v-for="property in dt.header_e" :key="property.id">
+                                                {{ row_item[property] }}
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <p class="f-90 gray-600 mb-0">
+                                {{ lang!='ENG'? dt.footnote : dt.footnote_e }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `,
+            data() {
+                return {
+                    lang: lang,
+                    table_lists: []
+                }
+            },
+            props:{
+                disclosure_id: Number
+            },
+            methods: {
+                async getTableList(disclosure_id){
+                    let response = await axios.get(end_point + '/read_table_list_on_disclosure', { params: {
+                        disclosure_id: this.disclosure_id
+                    }})
+                    this.table_lists = response.data
+                    return response.data
+                }
+            },
+            created(){
+                this.getTableList()
+            }
+        }
+
+        var reportDocuments = {
+            template: `
+                <div>
+                    <span v-for="x in document_lists" :key="x.id" class="f-105 line-height-lg">
+                        <span v-if="x.type!='link'" class="mr-3">
+                            <a v-if="lang!='ENG'" class="cursor" :href="static_host+x.path" target="_blank"><i class="fa-solid fa-file-lines mr-1"></i> {{ x.title }} </a>
+                            <a v-else class="cursor" :href="static_host+x.path_e" target="_blank"><i class="fa-solid fa-file-lines mr-1"></i> {{ x.title_e }} </a>
+                        </span>
+                        <span v-else class="mr3 mb-2">
+                            <a v-if="lang!='ENG'" class="cursor" :href="x.link" target="_blank"><i class="fa-solid fa-arrow-up-right-from-square mr-1"></i> {{ x.title }} </a>
+                            <a v-else class="cursor" :href="link_e" target="_blank"><i class="fa-solid fa-arrow-up-right-from-square mr-1"></i> {{ x.title_e }} </a>
+                        </span>
+                    </span>                
+                </div>
+            `,
+            data() {
+                return {
+                    static_host: 'http://report.dataflare.net/static/',
+                    lang: lang,
+                    document_lists: []
+                }
+            },
+            props:{
+                disclosure_id: Number
+            },
+            methods: {
+                async getDocumentList(){
+                    let response = await axios.get(end_point + '/read_document_list_on_disclosure', { params: {
+                        disclosure_id: this.disclosure_id
+                    }})
+                    this.document_lists = response.data
+                    return response.data
+                }
+            },
+            created(){
+                this.getDocumentList()
+            }
+            
+        }
+
+        var businessCases = {
+            template: `
+                <div>
+                    <span v-for="bc in business_case_list" :key="bc.id" class="line-height-lg">
+                        <a class="cursor mr-3 f-105" @click="$emit('show-modal', bc.business_case_id)"><i class="fa-solid fa-expand m-1"></i>
+                            {{ lang!='ENG' ? bc.title : bc.title_e }}
+                        </a>       
+                    </span>
+                </div>
+            `,
+            data(){
+                return {
+                    lang: lang,
+                    business_case_list: []
+                }
+            },
+            props:{
+                disclosure_id: Number
+            },
+            methods: {
+                async getBusinessCasesList(){
+                    let response = await axios.get(end_point + '/read_business_case_list_on_disclosure', { params: {
+                        disclosure_id: this.disclosure_id
+                    }})
+                    this.business_case_list = response.data
+                    console.log(response.data)
+                    return response.data
+                },
+            },
+            created(){
+                this.getBusinessCasesList()
+            }
+        }
+
         var app = new Vue({
             el: '#app',
-            data: {
-                report_contents: [],
-                loaded: false
+            data() {
+                return {
+                    lang: lang,
+                    report_contents: [],
+                    loaded: false,
+                    business_case: {
+                        business_case_id: '',
+                        title: '',
+                        description: '',
+                        time_stamp: '',
+                        business_case_e_id: 0,
+                        title_ea: '',
+                        title_em: '',
+                        description_ea: '',
+                        description_em: '',
+                        time_stamp_e: '',
+                        files: [],
+                        files_e: [],
+                        images: [],
+                        images_e: [],
+                        used_disclosures: []
+                    },
+                    low_height: false,
+                    show_modal: false,
+                    series_100: [
+                        {
+                        name: '조직 프로필',
+                        name_e: 'Organizational profile',
+                        codes: ['102-1', '102-2', '102-3', '102-4', '102-5', '102-6', '102-7', '102-8', '102-9', '102-10', '102-11', '102-12', '102-13']
+                        },
+                        {
+                        name: '전략',
+                        name_e: 'Strategy',
+                        codes: ['102-14', '102-15']
+                        },
+                        {
+                        name: '윤리 및 청렴성',
+                        name_e: 'Ethics and integrity',
+                        codes: ['102-16', '102-17']
+                        },
+                        {
+                        name: '지배구조',
+                        name_e: 'Governance',
+                        codes: ['102-18', '102-19', '102-20', '102-21', '102-22', '102-23', '102-24', '102-25', '102-26', '102-27', '102-28', '102-29', '102-30', '102-31', '102-32', '102-33', '102-34', '102-35', '102-36', '102-37', '102-38', '102-39']
+                        },
+                        {
+                        name: '이해관계자 참여',
+                        name_e: 'Stakeholder engagement',
+                        codes: ['102-40', '102-41', '102-42', '102-43', '102-44']
+                        },
+                        {
+                        name: '보고 관행',
+                        name_e: 'Reporting practice',
+                        codes: ['102-45', '102-46', '102-47', '102-48', '102-49', '102-50', '102-51', '102-52', '102-53', '102-54', '102-55', '102-56']
+                        }
+                    ],
+                    structures: [
+                        {
+                        key_code: 2,
+                        name: '경제',
+                        name_e: 'Economic'
+                        },
+                        {
+                        key_code: 3,
+                        name: '환경',
+                        name_e: 'Environmental'
+                        },
+                        {
+                        key_code: 4,
+                        name: '사회',
+                        name_e: 'Social'
+                        }
+                    ]
+                }            
+            },
+            computed: {
+                series_contents () {
+                    return (index) => {
+                        const temp_list = []
+                        for (let i = 0; i < this.series_100[index].codes.length; i++) {
+                            const idx = this.gri_100_all_contents.findIndex(x => x.gri_code == this.series_100[index].codes[i])
+                            if (idx > -1) {
+                                temp_list.push(this.gri_100_all_contents[idx])
+                            }
+                        }
+                        return temp_list
+                    }
+                },
+                gri_100_all_contents () {
+                    const temp_100 = this.report_contents.filter(x => x.topic_id >= 100 && x.topic_id <= 199)
+                    temp_100.sort((a, b) => parseFloat(a.topic_id) - parseFloat(b.topic_id))
+                    for (let i = 0; i < temp_100.length; i++) {
+                    const temp_content = { ...temp_100[i] }
+                    if (temp_100[i].direct_report_em != '' && temp_100[i].direct_report_em != null) {
+                        temp_content.direct_report_e = temp_100[i].direct_report_em
+                    } else { temp_content.direct_report_e = temp_100[i].direct_report_ea }
+
+                    temp_100[i] = temp_content
+                    }
+                    return temp_100
+                }
             },
             methods:{
                 getArticleList(){
-                    let end_point = 'http://report.dataflare.net/api/read_report_indicators'
-                    let report_code = 'r11'
+                    let report_code = 'vnjvn210409'
 
-                    axios.get(end_point, { params: {
+                    axios.get(end_point + '/read_report_contents', { params: {
                         report_code: report_code
                     }}).then(response => {
                         console.log(response)
                         this.loaded = true
                         this.report_contents = response.data
                     })
-
+                },
+                async showBusinessCaseModal(business_case_id){
+                    let response = await axios.get(end_point + '/read_business_case_entity', { params: {
+                        business_case_id: business_case_id
+                    }})
+                    console.log(response.data)
+                    this.business_case = response.data
+                    this.show_modal=true
+                    return response.data
                 }
             },
             created(){
                 this.getArticleList()
+            },
+            components: {
+                'data-tables': dataTables,
+                'report-documents': reportDocuments,
+                'buisness-cases': businessCases
             }
         })
     </script>
