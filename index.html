@@ -6,7 +6,7 @@
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
     <script src="https://unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.js"></script>
     <script src="https://kit.fontawesome.com/3f3ed23357.js" crossorigin="anonymous"></script>
-    <link href="http://cdn.qesg.co.kr/css/basic.css" rel="stylesheet">
+    <link href="basic.css" rel="stylesheet">
 </header>
 <body>
     <div id="app">
@@ -17,19 +17,19 @@
                 Universal Standards: <span class="fw-600"> GRI 100 </span>
             </h3>
             <div class="table-responsive">
-                <table class="table-responsive disclosure-table border-bottom mb-5" style="width: calc(100% + 2px)" 
+                <table class="table-responsive disclosure-table border-bottom mb-5" style="width: 100%" 
                 v-for="(category, index) in series_100"
                 :key="category.id"
                 >
                     <thead>
                         <tr>
-                            <td style="min-width:22%; width:30%;" />
-                            <td class="text-right">
+                            <td style="min-width:22%; width:30%;"></td>
+                            <td class="text-end">
                                 <div class="f-90">
-                                    <i class="fa-solid fa-table ml-3 mr-1">{{lang!='ENG' ? '테이블':'Tables'}}</i>
-                                    <i class="fa-solid fa-file-lines ml-3 mr-1">{{ lang!='ENG' ? '문서':'Files' }}</i>
-                                    <i class="fa-solid fa-arrow-up-right-from-square ml-3 mr-1">{{ lang!='ENG' ? '외부링크': 'Links'}} </i>
-                                    <i class="fa-solid fa-expand ml-3 mr-1">{{ lang!='ENG'? '비즈니스 사례':'Business Cases' }}></i>
+                                    <i class="fas fa-solid fa-table"></i>{{lang!='ENG' ? '테이블':'Tables'}}
+                                    <i class="fas fa-solid fa-file-lines"></i>{{ lang!='ENG' ? '문서':'Files' }}
+                                    <i class="fas fa-solid fa-arrow-up-right-from-square"></i>{{ lang!='ENG' ? '외부링크': 'Links'}}
+                                    <i class="fas fa-solid fa-expand"></i>{{ lang!='ENG'? '비즈니스 사례':'Business Cases' }}
                                 </div>
                             </td>
                         </tr>
@@ -54,47 +54,105 @@
                             </td>
                             <td>
                                 <div :class="item.direct_report? 'f-105 mb-4' : '' ">
-                                    {{ lang != 'ENG' ? item.direct_report: item.dicrect_report_e }}
+                                    {{ lang != 'ENG' ? item.direct_report: item.direct_report_e }}
                                 </div>
 
-                                <data-tables :disclosure_id="item.disclosure_id"></data-tables>
-                                <report-documents :disclosure_id="item.disclosure_id"></report-documents>
-                                <buisness-cases :disclosure_id="item.disclosure_id" @show-modal="showBusinessCaseModal"></buisness-cases>
+                                <data-tables :disclosure_id="item.disclosure_id" :lang="lang"></data-tables>
+                                <report-documents :disclosure_id="item.disclosure_id" :lang="lang"></report-documents>
+                                <buisness-cases :disclosure_id="item.disclosure_id"  :lang="lang" @show-modal="showBusinessCaseModal"></buisness-cases>
 
                             </td>
                         </tr>
                     </tbody>
                 </table>
-                <div v-show="show_modal==true" class="hj-modal-example-lg bg-white rounded shadow">
-                    <div class="hj-modal-header fw-500 f-120 d-flex align-items-center justify-content-between px-3">
-                        <div><span class="mr-2 f-100"> Business Case.</span> {{ lang!='ENG'? business_case.title : business_case.title_e }}</div>
-                        <button class="ml-auto py-0 px-2 mr-1" @click="low_height=!low_height"><i :class="low_height==true? 'fa-solid fa-expand' :'fa-solid fa-compress-alt'"></i></b-button>
-                        <button class="py-0 px-2" @click="show_modal=false"><i class="fa-solid fa-times"></i> </b-button>
-                    </div>
-                    <div class="hj-modal-body p-4" :style="low_height==true? 'height:calc(50vh - 50px)!important':''">
-                        <div v-if="lang!='ENG'">
-                            <div class="bc-simple-content pb-4" v-html="business_case.description"></div>
-                            <div v-if="business_case.business_case_id!=''&&business_case.files.length>0" class="f-95 gray-600 mb-45">
-                                첨부파일 :
-                                <span v-for="item in business_case.files" :key="item.id" class="mr-3">
-                                    <a :href="static_host+item.file_path" target="_blank">{{ item.file_name }}</a>
-                                </span>
-                            </div>
-                        </div>
-                        <div v-else>
-                            <div class="bc-simple-content pb-4" v-html="business_case.description_e"></div>
-                            <div v-if="business_case.business_case_id!=''&&business_case.files_e.length>0" class="f-95 gray-600 mb-45">
-                                Attatched File :
-                                <span v-for="item in business_case.files_e" :key="item.id" class="mr-3">
-                                    <a :href="static_host+item.file_path_e" target="_blank">{{ item.file_name }}</a>
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                </div> 
             </div>
 
             <!-- GRI 200 ~ 400 -->
+            <h3 class="pt-5 mb-4">
+                Topic-Specific Disclosures: <span class="fw-600"> GRI 200 - 400 </span>
+            </h3>
+            <div class="table-responsive">
+                <table class="table-responsive disclosure-table border-bottom mb-5" style="width: 100%" 
+                v-for="(category, index) in gri_structures"
+                :key="category.key_code"
+                >
+                    <thead>
+                        <tr>
+                            <td style="min-width:22%; width:30%;"></td>
+                            <td class="text-end">
+                                <div class="f-90">
+                                    <i class="fas fa-solid fa-table"></i>{{lang!='ENG' ? '테이블':'Tables'}}
+                                    <i class="fas fa-solid fa-file-lines"></i>{{ lang!='ENG' ? '문서':'Files' }}
+                                    <i class="fas fa-solid fa-arrow-up-right-from-square"></i>{{ lang!='ENG' ? '외부링크': 'Links'}}
+                                    <i class="fas fa-solid fa-expand"></i>{{ lang!='ENG'? '비즈니스 사례':'Business Cases' }}
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="px-3 py-2 border-0 f-130 fw-500 bgray-700 text-white">
+                                {{ index+1 }}. {{ lang!='ENG' ? category.name : category.name_e }}
+                            </td>
+                            <td class="bgray-700"></td>
+                        </tr>
+                    </thead>
+                    <tbody class="border-0">
+                        <tr v-for="item in getGRIContents(category.key_code)" :key="item.id">
+                            <td>
+                                <div class="d-flex">
+                                    <div class="f-110 fw-500" style="min-width: 70px;">
+                                        {{ item.gri_code }}
+                                    </div>
+                                    <div class="f-105">
+                                        {{ lang!='ENG'? item.indicator_name : item.indicator_name_e }}
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div :class="item.direct_report? 'f-105 mb-4' : '' ">
+                                    {{ lang != 'ENG' ? item.direct_report: item.direct_report_e }}
+                                </div>
+
+                                <data-tables :disclosure_id="item.disclosure_id" :lang="lang"></data-tables>
+                                <report-documents :disclosure_id="item.disclosure_id" :lang="lang"></report-documents>
+                                <buisness-cases :disclosure_id="item.disclosure_id" :lang="lang" @show-modal="showBusinessCaseModal"></buisness-cases>
+
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+
+            <div v-show="show_modal==true" class="hj-modal-example-lg bg-white rounded shadow">
+                <div class="hj-modal-header fw-500 f-120 d-flex align-items-center justify-content-between px-3">
+                    <div><span class="mr-2 f-100"> Business Case.</span> {{ lang!='ENG'? business_case.title : business_case.title_e }}</div>
+                    <button type="button" class="btn ml-auto py-0 px-2 mr-1" @click="low_height=!low_height"><i :class="low_height==true? 'fas fa-solid fa-expand' :'fas fa-solid fa-compress-alt'"></i></button>
+                    <button type="button" class="btn py-0 px-2" @click="show_modal=false"><i class="fas fa-solid fa-times"></i> </button>
+                </div>
+                <div class="hj-modal-body p-4" :style="low_height==true? 'height:calc(50vh - 50px)!important':''">
+                    <div v-if="lang!='ENG'">
+                        <div class="bc-simple-content pb-4" v-html="business_case.description"></div>
+                        <div v-if="business_case.business_case_id!=''&&business_case.files.length>0" class="f-95 gray-600 mb-45">
+                            첨부파일 :
+                            <span v-for="item in business_case.files" :key="item.id" class="mr-3">
+                                <a :href="static_host+item.file_path" target="_blank">{{ item.file_name }}</a>
+                            </span>
+                        </div>
+                    </div>
+                    <div v-else>
+                        <div class="bc-simple-content pb-4" v-html="business_case.description_e"></div>
+                        <div v-if="business_case.business_case_id!=''&&business_case.files_e.length>0" class="f-95 gray-600 mb-45">
+                            Attatched File :
+                            <span v-for="item in business_case.files_e" :key="item.id" class="mr-3">
+                                <a :href="static_host+item.file_path_e" target="_blank">{{ item.file_name }}</a>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div> 
+        </div>
+
+
             
 
 
@@ -102,19 +160,22 @@
         </div>
     </div>
     <script type="text/javascript">
+        var urlParams = new URL(location.href).searchParams
+        var end_point = 'https://report.dataflare.net/api'
+        
+        var lang = urlParams.get('l') == 'ENG' ? 'ENG' : 'KOR'
+        var report_code = urlParams.get('r') || 'vnjvn210409'
 
-        var end_point = 'http://localhost:5000/api'
-        var lang = 'KOR'
         var dataTables = {
             template : `
                 <div>
                     <div v-if="table_lists.length>0">
                         <div v-for="dt in table_lists" :key="dt.id" class="f-105 line-height-lg">
                             <div class="mb-2 fw-500">
-                                <i class="fa-solid fa-table mr-1"></i> {{ lang != 'ENG' ? dt.title : dt.title_e }}
+                                <i class="fas fa-solid fa-table mr-1"></i> {{ lang != 'ENG' ? dt.title : dt.title_e }}
                             </div>
                             <div class="table-responsive mb-4">
-                                <table v-if="lang!='ENG'" class="edi-table" v-for="item in table_lists">
+                                <table v-if="lang!='ENG'" class="edi-table">
                                     <thead>
                                         <tr>
                                             <td v-for="(property, col_index) in dt.header" :key="col_index">
@@ -130,7 +191,7 @@
                                         </tr>
                                     </tbody>
                                 </table>
-                                <table v-else class="edi-table" v-for="item in table_lists">
+                                <table v-else class="edi-table">
                                     <thead>
                                         <tr>
                                             <td v-for="(property, col_index) in dt.header_e" :key="col_index">
@@ -156,12 +217,12 @@
             `,
             data() {
                 return {
-                    lang: lang,
                     table_lists: []
                 }
             },
             props:{
-                disclosure_id: Number
+                disclosure_id: Number,
+                lang: String
             },
             methods: {
                 async getTableList(disclosure_id){
@@ -180,27 +241,27 @@
         var reportDocuments = {
             template: `
                 <div>
-                    <span v-for="x in document_lists" :key="x.id" class="f-105 line-height-lg">
+                    <div v-for="x in document_lists" :key="x.id" class="f-105 line-height-lg">
                         <span v-if="x.type!='link'" class="mr-3">
-                            <a v-if="lang!='ENG'" class="cursor" :href="static_host+x.path" target="_blank"><i class="fa-solid fa-file-lines mr-1"></i> {{ x.title }} </a>
-                            <a v-else class="cursor" :href="static_host+x.path_e" target="_blank"><i class="fa-solid fa-file-lines mr-1"></i> {{ x.title_e }} </a>
+                            <a v-if="lang!='ENG'" class="cursor" :href="static_host+x.path" target="_blank"><i class="fas fa-solid fa-file-lines mr-1"></i> {{ x.title }} </a>
+                            <a v-else class="cursor" :href="static_host+x.path_e" target="_blank"><i class="fas fa-solid fa-file-lines mr-1"></i> {{ x.title_e }} </a>
                         </span>
                         <span v-else class="mr3 mb-2">
-                            <a v-if="lang!='ENG'" class="cursor" :href="x.link" target="_blank"><i class="fa-solid fa-arrow-up-right-from-square mr-1"></i> {{ x.title }} </a>
-                            <a v-else class="cursor" :href="link_e" target="_blank"><i class="fa-solid fa-arrow-up-right-from-square mr-1"></i> {{ x.title_e }} </a>
+                            <a v-if="lang!='ENG'" class="cursor" :href="x.link" target="_blank"><i class="fas fa-solid fa-arrow-up-right-from-square mr-1"></i> {{ x.title }} </a>
+                            <a v-else class="cursor" :href="x.link_e" target="_blank"><i class="fas fa-solid fa-arrow-up-right-from-square mr-1"></i> {{ x.title_e }} </a>
                         </span>
-                    </span>                
+                    </div>                
                 </div>
             `,
             data() {
                 return {
                     static_host: 'http://report.dataflare.net/static/',
-                    lang: lang,
-                    document_lists: []
+                    document_lists: [],
                 }
             },
             props:{
-                disclosure_id: Number
+                disclosure_id: Number,
+                lang: String
             },
             methods: {
                 async getDocumentList(){
@@ -220,21 +281,21 @@
         var businessCases = {
             template: `
                 <div>
-                    <span v-for="bc in business_case_list" :key="bc.id" class="line-height-lg">
-                        <a class="cursor mr-3 f-105" @click="$emit('show-modal', bc.business_case_id)"><i class="fa-solid fa-expand m-1"></i>
+                    <div v-for="bc in business_case_list" :key="bc.id" class="line-height-lg">
+                        <a class="cursor mr-3 f-105" @click="$emit('show-modal', bc.business_case_id)"><i class="fas fa-solid fa-expand mr-1"></i>
                             {{ lang!='ENG' ? bc.title : bc.title_e }}
                         </a>       
-                    </span>
+                    </div>
                 </div>
             `,
             data(){
                 return {
-                    lang: lang,
                     business_case_list: []
                 }
             },
             props:{
-                disclosure_id: Number
+                disclosure_id: Number,
+                lang: String
             },
             methods: {
                 async getBusinessCasesList(){
@@ -242,7 +303,7 @@
                         disclosure_id: this.disclosure_id
                     }})
                     this.business_case_list = response.data
-                    console.log(response.data)
+                    //console.log(response.data)
                     return response.data
                 },
             },
@@ -256,6 +317,7 @@
             data() {
                 return {
                     lang: lang,
+                    report_code: report_code,
                     report_contents: [],
                     loaded: false,
                     business_case: {
@@ -309,7 +371,7 @@
                         codes: ['102-45', '102-46', '102-47', '102-48', '102-49', '102-50', '102-51', '102-52', '102-53', '102-54', '102-55', '102-56']
                         }
                     ],
-                    structures: [
+                    gri_structures: [
                         {
                         key_code: 2,
                         name: '경제',
@@ -344,23 +406,14 @@
                 gri_100_all_contents () {
                     const temp_100 = this.report_contents.filter(x => x.topic_id >= 100 && x.topic_id <= 199)
                     temp_100.sort((a, b) => parseFloat(a.topic_id) - parseFloat(b.topic_id))
-                    for (let i = 0; i < temp_100.length; i++) {
-                    const temp_content = { ...temp_100[i] }
-                    if (temp_100[i].direct_report_em != '' && temp_100[i].direct_report_em != null) {
-                        temp_content.direct_report_e = temp_100[i].direct_report_em
-                    } else { temp_content.direct_report_e = temp_100[i].direct_report_ea }
 
-                    temp_100[i] = temp_content
-                    }
                     return temp_100
                 }
             },
             methods:{
                 getArticleList(){
-                    let report_code = 'vnjvn210409'
-
                     axios.get(end_point + '/read_report_contents', { params: {
-                        report_code: report_code
+                        report_code: this.report_code
                     }}).then(response => {
                         console.log(response)
                         this.loaded = true
@@ -375,6 +428,30 @@
                     this.business_case = response.data
                     this.show_modal=true
                     return response.data
+                },
+                getGRIContents(part){
+                    let start_num = 200
+                    let end_num = 299
+                    if (part==3) {
+                        start_num = 300
+                        end_num = 399
+                    }
+                    if (part==4) {
+                        start_num = 400
+                        end_num = 499
+                    }
+                    const temp_all = this.report_contents.filter(x => x.topic_id >= start_num && x.topic_id < end_num)
+                    temp_all.sort((a, b) => parseFloat(a.topic_id) - parseFloat(b.topic_id))
+                    return temp_all
+                },
+                toggleLang(){
+                    if(this.lang == 'KOR') 
+                    {
+                        this.lang='ENG'
+                    }
+                    else{
+                        this.lang='KOR'
+                    }
                 }
             },
             created(){
